@@ -38,7 +38,8 @@ header { position: sticky; top: 0; z-index: 100; background: rgba(26,39,68,0.94)
 .header-info { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); display: flex; gap: 16px; }
 .header-stat { display: flex; flex-direction: column; align-items: flex-end; }
 .header-stat-val { color: var(--text); font-weight: 500; }
-nav { display: flex; gap: 2px; padding: 1rem 2rem 0; position: relative; z-index: 1; }
+nav { display: flex; gap: 2px; padding: 1rem 2rem 0; position: relative; z-index: 1; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+nav::-webkit-scrollbar { display: none; }
 .nav-btn { padding: 8px 20px; background: none; border: none; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; letter-spacing: 0.04em; transition: all 0.2s; }
 .nav-btn:hover { color: var(--text); }
 .nav-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
@@ -125,17 +126,17 @@ main { max-width: 960px; margin: 0 auto; padding: 1.5rem 2rem 3rem; position: re
   .logo { font-size: 14px; gap: 8px; }
   .logo-icon { width: 24px; height: 24px; font-size: 12px; }
   .header-info { gap: 10px; }
-  nav { padding: 0.75rem 1rem 0; gap: 0; flex-wrap: wrap; }
-  .nav-btn { padding: 7px 12px; font-size: 12px; }
-  main { padding: 1rem 1rem 2rem; }
-  .card { padding: 1rem; }
+  nav { padding: 0.5rem 0.75rem 0; gap: 0; flex-wrap: wrap; overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; }
+  .nav-btn { padding: 7px 11px; font-size: 11px; white-space: nowrap; flex-shrink: 0; }
+  main { padding: 0.75rem 0.75rem 2rem; }
+  .card { padding: 0.875rem; }
   .form-grid { grid-template-columns: 1fr; gap: 0.75rem; }
   .metric-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .ozet-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .metric-value { font-size: 16px; }
   .ozet-val { font-size: 15px; }
-  .btn-row { flex-wrap: wrap; }
-  .btn { padding: 10px 16px; font-size: 12px; width: 100%; text-align: center; }
+  .btn-row { flex-wrap: wrap; gap: 8px; }
+  .btn-row .btn { flex: 1; min-width: 120px; text-align: center; }
   .rota-item { flex-wrap: wrap; gap: 8px; padding: 12px 0; }
   .rota-route { min-width: 100%; }
   .rota-cost { text-align: left; min-width: auto; }
@@ -143,21 +144,35 @@ main { max-width: 960px; margin: 0 auto; padding: 1.5rem 2rem 3rem; position: re
   .report-table { font-size: 11px; display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .report-table th, .report-table td { padding: 8px 6px; white-space: nowrap; }
   .dokum-table { font-size: 12px; }
-  .toast { bottom: 1rem; right: 1rem; left: 1rem; }
-  /* Handling paneli */
+  .toast { bottom: 1rem; right: 0.75rem; left: 0.75rem; }
   #hc-detay { font-size: 10px; line-height: 1.8; word-break: break-word; }
+  /* Bacak satırı grid — mobilde 2+2 */
+  .leg-grid { grid-template-columns: 1fr 1fr !important; }
+  .leg-grid .mesafe-col, .leg-grid .sure-col { }
+  /* Global ayarlar 3 kolon → 1 kolon */
+  .global-ayarlar { grid-template-columns: 1fr !important; gap: 0.75rem !important; }
+  /* Ücret grid */
+  #ticari-fields .form-grid { grid-template-columns: 1fr; }
+  /* Döküm tablosu */
+  .dokum-table input[type=number] { width: 75px !important; }
 }
 
 @media (max-width: 480px) {
-  .metric-grid { grid-template-columns: 1fr; }
-  .ozet-grid { grid-template-columns: 1fr; }
-  nav { justify-content: center; }
-  .nav-btn { padding: 6px 10px; font-size: 11px; flex: 1; text-align: center; }
+  header { height: 50px; }
+  .logo span:last-child { display: none; } /* v1.0 badge gizle */
+  .metric-grid { grid-template-columns: repeat(2, 1fr); }
+  .ozet-grid { grid-template-columns: repeat(2, 1fr); }
+  nav { padding: 0.5rem 0.5rem 0; }
+  .nav-btn { padding: 6px 9px; font-size: 10px; }
   .header-info { display: none; }
   .rota-city { font-size: 13px; }
-  .form-group input, .form-group select { font-size: 13px; padding: 9px 12px; }
+  .form-group input, .form-group select { font-size: 14px; padding: 10px 12px; }
   .card-title { font-size: 10px; }
   .dokum-table td { padding: 7px 4px; font-size: 11px; }
+  .card { padding: 0.75rem; }
+  main { padding: 0.5rem 0.5rem 2rem; }
+  /* Bacak grid mobilde tam genişlik, 2 kolon */
+  .leg-grid { grid-template-columns: 1fr 1fr !important; }
 }
 </style>
 </head>
@@ -210,7 +225,7 @@ main { max-width: 960px; margin: 0 auto; padding: 1.5rem 2rem 3rem; position: re
           <span id="leg-label-0" style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--accent); font-weight:700; min-width:62px;">BACAK 1</span>
           <div id="leg-info-0" style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); flex:1;"></div>
         </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr 110px 110px; gap:0.6rem; align-items:end;">
+        <div class="leg-grid" style="display:grid; grid-template-columns:1fr 1fr 110px 110px; gap:0.6rem; align-items:end;">
           <div class="form-group" style="margin:0;">
             <label style="font-size:10px;">Kalkış</label>
             <div class="ac-wrap">
@@ -247,7 +262,7 @@ main { max-width: 960px; margin: 0 auto; padding: 1.5rem 2rem 3rem; position: re
       <div id="legs-container"></div>
 
       <!-- Global ayarlar -->
-      <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border); display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem;">
+      <div class="global-ayarlar" style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border); display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem;">
         <div class="form-group">
           <label>Uçuş tipi <span class="rota-badge" id="rota-tip-badge"></span></label>
           <select id="ucus-tipi" onchange="ucusTipiDegisti()">
@@ -707,7 +722,7 @@ function bacakEkle(autoKalkis) {
       <div id="leg-info-${idx}" style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); flex:1;"></div>
       <button class="btn btn-danger" onclick="bacakSil(${idx})" style="padding:3px 10px; font-size:11px;">× Sil</button>
     </div>
-    <div style="display:grid; grid-template-columns:1fr 1fr 110px 110px; gap:0.6rem; align-items:end;">
+    <div class="leg-grid" style="display:grid; grid-template-columns:1fr 1fr 110px 110px; gap:0.6rem; align-items:end;">
       <div class="form-group" style="margin:0;">
         <label style="font-size:10px;">Kalkış</label>
         <div class="ac-wrap">
