@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>TC-ORK | Hawker 750 Uçuş Hesaplama v1.2</title>
+<title>TC-ORK | Hawker 750 Uçuş Hesaplama v1.3</title>
 
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
@@ -182,7 +182,7 @@ main { max-width: 960px; margin: 0 auto; padding: 1.5rem 2rem 3rem; position: re
   <div class="logo">
     <div class="logo-icon">✈</div>
     TC-ORK <span>Hawker 750</span>
-    <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted); background:var(--surface2); border:1px solid var(--border2); border-radius:4px; padding:2px 7px; margin-left:4px;">v1.0</span>
+    <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted); background:var(--surface2); border:1px solid var(--border2); border-radius:4px; padding:2px 7px; margin-left:4px;">v1.3</span>
   </div>
   <div class="header-info">
     <div class="header-stat">
@@ -308,7 +308,7 @@ main { max-width: 960px; margin: 0 auto; padding: 1.5rem 2rem 3rem; position: re
           </div>
           <div class="form-group">
             <label>İkram (€/PAX) <span class="auto-badge" id="ikram-badge">OTOMATİK</span></label>
-            <input type="number" id="ikram_birim" value="100" step="1" placeholder="€/PAX" readonly style="opacity:0.6;cursor:not-allowed;">
+            <input type="number" id="ikram_birim" value="100" step="1" placeholder="€/PAX">
             <div style="font-size:10px;color:var(--muted);margin-top:4px;" id="ikram-aciklama">Ticari: &lt;1 saat → €100/PAX · ≥1 saat → €200/PAX (otomatik)</div>
           </div>
         </div>
@@ -409,9 +409,9 @@ main { max-width: 960px; margin: 0 auto; padding: 1.5rem 2rem 3rem; position: re
       </div>
       <!-- Detaylı maliyet tablosu -->
       <div class="card" style="margin-top:1rem;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
           <div class="card-title" style="margin:0;">Maliyet dökümü</div>
-          <button class="btn btn-export" onclick="sonucYazdir()" style="padding:6px 14px; font-size:11px;">🖨 Yazdır</button>
+          <button class="btn btn-primary" onclick="sonucYazdir()" style="padding:8px 18px; font-size:12px; display:flex; align-items:center; gap:6px;">🖨 Yazdır / PDF</button>
         </div>
         <div id="maliyet-dokum"></div>
       </div>
@@ -687,7 +687,7 @@ main { max-width: 960px; margin: 0 auto; padding: 1.5rem 2rem 3rem; position: re
 <div class="toast" id="toast"><div class="toast-dot"></div><span id="toast-msg"></span></div>
 
 <footer style="text-align:center; padding:2rem 1rem 1.5rem; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); border-top:1px solid var(--border); margin-top:2rem;">
-  © 2026 <span style="color:var(--text); font-weight:600;">Emre Özsümer</span> — Tüm hakları saklıdır. <span style="color:var(--border2);">·</span> <span style="color:var(--accent); font-family:'IBM Plex Mono',monospace;">v1.0</span>
+  © 2026 <a href="mailto:emreozsumer@gmail.com" style="color:var(--text); font-weight:600; text-decoration:none;">F.Emre Özsümer</a> — Tüm hakları saklıdır. <span style="color:var(--border2);">·</span> <span style="color:var(--accent); font-family:'IBM Plex Mono',monospace;">v1.3</span>
 </footer>
 
 <script>
@@ -1082,35 +1082,30 @@ function perdiemIkramGuncelle() {
   const perdiemAcik = document.getElementById('perdiem-aciklama');
   const ikramAcik = document.getElementById('ikram-aciklama');
 
+  // Tüm alanlar her zaman düzenlenebilir
+  [perdiemInput, ikramInput].forEach(el => {
+    if (!el) return;
+    el.readOnly = false;
+    el.style.opacity = '1';
+    el.style.cursor = '';
+  });
+
   if (tip === 'ticari') {
-    // Ticari: per diem sabit kural, ikram süreye göre otomatik
     const pdVal = yurtici ? 100 : 150;
-    perdiemInput.value = pdVal;
-    perdiemInput.readOnly = true;
-    perdiemInput.style.opacity = '0.6';
-    perdiemInput.style.cursor = 'not-allowed';
-    perdiemBadge.textContent = 'KURAL';
-    perdiemAcik.textContent = `Ticari: ${yurtici?'Yurt İçi':'Yurt Dışı'} €${pdVal} × 3 kişi = €${pdVal*3} · ⚠ 24 saatte max 1×`;
-
-    // İkram: hesapla() çalışınca süreye göre otomatik dolacak; şimdilik readonly göster
-    ikramInput.readOnly = true;
-    ikramInput.style.opacity = '0.6';
-    ikramInput.style.cursor = 'not-allowed';
-    ikramBadge.textContent = 'OTOMATİK';
-    ikramAcik.textContent = `< 1 saat → €100/PAX · ≥ 1 saat → €200/PAX (hesapla'da otomatik)`;
+    if (perdiemInput) {
+      perdiemInput.value = pdVal;
+      if (perdiemBadge) perdiemBadge.textContent = 'DEĞİŞTİRİLEBİLİR';
+      if (perdiemAcik) perdiemAcik.textContent = `Öneri: ${yurtici?'Yİ':'YD'} €${pdVal} × 3 kişi · ⚠ 24 saatte max 1× · Düzenleyebilirsiniz`;
+    }
+    if (ikramInput) {
+      if (ikramBadge) ikramBadge.textContent = 'DEĞİŞTİRİLEBİLİR';
+      if (ikramAcik) ikramAcik.textContent = `Öneri: <1 saat →€100 · ≥1 saat →€200/PAX · Hesapla'da otomatik, sonra düzenleyebilirsiniz`;
+    }
   } else {
-    // Uçak Sahibi: her ikisi de elle girilebilir
-    perdiemInput.readOnly = false;
-    perdiemInput.style.opacity = '1';
-    perdiemInput.style.cursor = '';
-    perdiemBadge.textContent = 'ELLE GİRİN';
-    perdiemAcik.textContent = 'Uçak Sahibi: elle girilebilir (€/kişi × 3 mürettebat)';
-
-    ikramInput.readOnly = false;
-    ikramInput.style.opacity = '1';
-    ikramInput.style.cursor = '';
-    ikramBadge.textContent = 'ELLE GİRİN';
-    ikramAcik.textContent = `Uçak Sahibi: elle girilebilir (€/PAX × ${pax} PAX)`;
+    if (perdiemBadge) perdiemBadge.textContent = 'ELLE GİRİN';
+    if (perdiemAcik) perdiemAcik.textContent = 'Elle girin (€/kişi × 3 mürettebat)';
+    if (ikramBadge) ikramBadge.textContent = 'ELLE GİRİN';
+    if (ikramAcik) ikramAcik.textContent = `Elle girin (€/PAX × ${pax} PAX)`;
   }
 }
 
@@ -1193,6 +1188,29 @@ function hesapla() {
   };
   const paraSembolH = {'EUR':'€','USD':'$','GBP':'£','NOK':'kr'};
 
+  // ── Bölgesel varsayılan handling (DB'de yoksa) ──────────────────────────
+  // Balkan: L harfiyle başlayan Avrupa ülkeleri (LY=Sırbistan, LD=Hırvatistan, LQ=BİH, LW=Avusturya, vs.)
+  function handlingVarsayilan(icao) {
+    if (!icao || icao.length < 2) return 0;
+    const p = icao.substring(0, 2).toUpperCase();
+    // Türkiye
+    if (isTurkiye(icao)) return TR_HANDLING;
+    // Balkan ülkeleri: LY(Sırbistan), LD(Hırvatistan), LQ(BİH), LK(Çekya), LZ(Slovakya),
+    //   LJ(Slovenya), LO(Avusturya), LH(Macaristan), LR(Romanya), LB(Bulgaristan),
+    //   LG(Yunanistan), LA(Arnavutluk - LATI), BK(Kosova), LY(Karadağ)
+    const balkan = ['LY','LD','LQ','LJ','LO','LH','LR','LB','LG','BK','LA'];
+    if (balkan.includes(p)) return 2500;
+    // Arap/Orta Doğu: O harfiyle başlayanlar (OJ=Ürdün, OK-, OL-, OM=BAE, OE=S.Arabistan, HE=Mısır, HL=Libya, HE, HS)
+    const arap = ['OJ','OE','OM','OO','OR','OT','HE','HL','HS','HH'];
+    if (arap.includes(p)) return 5000;
+    // Afrika: H ile başlayanlar
+    if (icao.startsWith('H')) return 5000;
+    // Kafkasya / Orta Asya: U ile başlayanlar
+    if (icao.startsWith('U')) return 3500;
+    // Varsayılan Avrupa
+    return 3500;
+  }
+
   function handlingEurAl(icao, parkDahil) {
     const h = getHandlingFiyat(icao);
     if (h) {
@@ -1203,8 +1221,7 @@ function hesapla() {
       if (h.para==='NOK') return f * 0.087;
       return f;
     }
-    if (isTurkiye(icao)) return TR_HANDLING;
-    return 0;
+    return handlingVarsayilan(icao);
   }
   function terminalBirimAl(icao) {
     const t = TERMINAL_FATURA_DB[icao];
@@ -1219,7 +1236,11 @@ function hesapla() {
     const h = getHandlingFiyat(icao);
     if (h) return `${(paraSembolH[h.para]||'')}${h.apron.toLocaleString()} ${h.para||'EUR'} (DB)`;
     if (isTurkiye(icao)) return `${TR_HANDLING}€ (TR ort.)`;
-    return '';
+    const v = handlingVarsayilan(icao);
+    if (v === 2500) return `€2.500 (Balkan tahmini)`;
+    if (v === 5000) return `€5.000 (Arap/Afrika tahmini)`;
+    if (v === 3500) return `€3.500 (Avrupa tahmini)`;
+    return `€${v} (tahmini)`;
   }
 
   let rowId = 0;
@@ -1238,7 +1259,7 @@ function hesapla() {
             style="width:90px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;text-align:right;outline:none;"
             oninput="dokumTopla()" onfocus="this.select()">
         </div>
-        <span class="dokum-tl" style="font-size:11px;color:var(--muted);display:block;text-align:right;margin-top:2px;">${formatTl(eur * eurKur)}</span>
+        <span class="dokum-tl" style="font-size:11px;color:var(--muted);display:block;text-align:right;margin-top:2px;">$${Math.round(eur * eurUsd).toLocaleString('tr-TR')}</span>
       </td>
     </tr>`;
   }
@@ -1406,7 +1427,7 @@ function dokumTopla() {
       const val = parseFloat(el.value) || 0;
       toplam += val;
       const tlSpan = el.closest('td').querySelector('.dokum-tl');
-      if (tlSpan) tlSpan.textContent = formatTl(val * eurKur);
+      if (tlSpan) tlSpan.textContent = '$' + Math.round(val * eurUsd).toLocaleString('tr-TR');
     }
   });
 
@@ -1415,7 +1436,7 @@ function dokumTopla() {
 
   // Toplam satırını güncelle
   const tdEl = document.getElementById('dokum-toplam-td');
-  if (tdEl) tdEl.innerHTML = `${formatEur(toplam)}<br><span style="font-size:12px;color:var(--muted);" id="dokum-toplam-usd">$${Math.round(toplamUsd).toLocaleString('tr-TR')}</span>`;
+  if (tdEl) tdEl.innerHTML = `${formatEur(toplam)}<br><span style="font-size:13px;color:#5cb8ff;font-weight:600;" id="dokum-toplam-usd">$${Math.round(toplamUsd).toLocaleString('tr-TR')}</span>`;
 
   // Metrikler
   document.getElementById('m-toplam-eur').textContent = formatEur(toplam);
@@ -2421,7 +2442,13 @@ function yerlesikHesapla(soru) {
         if (h.para === 'NOK') return f * 0.087;
         return f;
       }
-      return isTurkiye(icao) ? 150 : 0;
+      if (isTurkiye(icao)) return 150;
+      const p = icao.substring(0,2);
+      const balkan = ['LY','LD','LQ','LJ','LO','LH','LR','LB','LG','BK','LA'];
+      if (balkan.includes(p)) return 2500;
+      const arap = ['OJ','OE','OM','OO','OR','OT','HE','HL','HS','HH'];
+      if (arap.includes(p) || icao.startsWith('H')) return 5000;
+      return 3500; // Avrupa varsayılan
     }
     const hK = hEur(k), hV = hEur(v);
     const INIS_AI = {'LTAC':299,'LTBA':271,'LTBJ':287,'LTFE':287,'LTFJ':256,'LTDA':256,'LTAI':260,'LTCG':260,'LTBS':260,'LTCR':260,'LTAL':260,'LTAN':260,'LCEN':200,'LTFD':200,'LTAT':260,'LTCC':260,'LTFM':271,'LGMK':120,'LGRP':78,'LGSR':120,'LGAV':200,'EGKB':873};
