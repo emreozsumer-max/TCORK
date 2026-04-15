@@ -1157,8 +1157,9 @@ function hesapla() {
   const topSureDk  = legData.reduce((s, l) => s + l.sureDk, 0);
   const topSureSaat = topSureDk / 60;
   const topMesafe  = legData.reduce((s, l) => s + l.mesafe, 0);
-  const saatTam = Math.floor(topSureSaat);
-  const dakTam  = Math.round((topSureSaat - saatTam) * 60);
+  let saatTam = Math.floor(topSureSaat);
+  let dakTam  = Math.round((topSureSaat - saatTam) * 60);
+  if (dakTam === 60) { saatTam += 1; dakTam = 0; } // 59.5dk → 1sa 0dk
 
   // ── YAKIT DURAĞU KONTROLÜ ──────────────────────────────────────────────
   const asimLeglar = legData.filter(l => l.sureDk > 270);
@@ -1274,6 +1275,7 @@ function hesapla() {
     const saatlikUcret = parseFloat(document.getElementById('saatlik_ucret').value) || 4500;
     const perDiemBirim = parseFloat(document.getElementById('perdiem_birim').value) || 0;
     const perDiemEur   = muret * perDiemBirim;
+    let toplamUcusEur  = 0; // Tüm bacakların uçuş ücreti toplamı
 
     // Çoklu bacak: her bacak ayrı hesaplanır
     legData.forEach((leg, i) => {
@@ -1282,6 +1284,7 @@ function hesapla() {
       const isParkLeg   = (i === legData.length - 1) && gecePark;
 
       const ucusEur     = legSureSaat * saatlikUcret;
+      toplamUcusEur    += ucusEur; // biriktir
       const euroEur     = Math.round(legSureSaat * 200);
       const hKalkis     = handlingEurAl(leg.kIcao, false);
       const hVaris      = handlingEurAl(leg.vIcao, isParkLeg ? 1 : 0);
@@ -1292,8 +1295,9 @@ function hesapla() {
       const ikramBirim  = legSureSaat < 1 ? 100 : 200;
       const ikramEur    = pax > 0 ? pax * ikramBirim : 0;
       const gumrukEur   = legYurtici ? 0 : 40;
-      const legSaatTam  = Math.floor(legSureSaat);
-      const legDakTam   = Math.round((legSureSaat - legSaatTam) * 60);
+      let legSaatTam  = Math.floor(legSureSaat);
+      let legDakTam   = Math.round((legSureSaat - legSaatTam) * 60);
+      if (legDakTam === 60) { legSaatTam += 1; legDakTam = 0; }
 
       rows += `<tr><td colspan="2" style="padding:6px 0 2px;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);">
         ── BACAK ${i+1}: ${leg.kIcao} → ${leg.vIcao} &nbsp;·&nbsp; ${legSaatTam}sa ${legDakTam}dk${leg.mesafe?' · '+leg.mesafe+' NM':''}${leg.sureDk>270?' ⛽':''}
@@ -1310,6 +1314,10 @@ function hesapla() {
       rows += editRow(`İkram (${pax} PAX × €${ikramBirim})`, ikramEur, legSureSaat<1?'< 1 saat':'≥ 1 saat');
       if (!legYurtici) rows += editRow(`Gümrük`, gumrukEur, '★ Fatura ort.');
     });
+
+    // Toplam uçuş ücretini metriğe yansıt
+    window._toplamUcusEur = toplamUcusEur;
+    window._toplamSureSaat = topSureSaat;
 
     // Per diem — tüm uçuş için bir kez
     rows += `<tr><td colspan="2" style="padding:8px 0 2px;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);">── Genel (tüm uçuş)</td></tr>`;
@@ -1349,8 +1357,9 @@ function hesapla() {
       const inisV     = inisEurAl(leg.vIcao);
       const ikramEur  = pax > 0 ? pax * ikramBirim : 0;
       const gumrukEur = legYurtici ? 0 : 40;
-      const legSaatTam= Math.floor(legSureSaat);
-      const legDakTam = Math.round((legSureSaat - legSaatTam) * 60);
+      let legSaatTam= Math.floor(legSureSaat);
+      let legDakTam = Math.round((legSureSaat - legSaatTam) * 60);
+      if (legDakTam === 60) { legSaatTam += 1; legDakTam = 0; }
 
       rows += `<tr><td colspan="2" style="padding:6px 0 2px;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#ffa500;">
         ── BACAK ${i+1}: ${leg.kIcao} → ${leg.vIcao} &nbsp;·&nbsp; ${legSaatTam}sa ${legDakTam}dk${leg.sureDk>270?' ⛽':''}
@@ -1404,7 +1413,6 @@ function hesapla() {
   document.getElementById('m-sure').textContent = saatTam + 'sa ' + dakTam + 'dk';
   document.getElementById('m-sure-unit').textContent = legData.length > 1 ? `${legData.length} bacak toplamı` : 'saat : dakika';
   document.getElementById('m-yakit-label').textContent = ucusTipi === 'sahip' ? 'Yakıt maliyeti' : 'Uçuş ücreti';
-  document.getElementById('m-yakit-unit').textContent = ucusTipi === 'sahip' ? 'toplam litre bazlı' : 'saatlik × toplam süre';
 
   document.getElementById('maliyet-dokum').innerHTML = `<table class="dokum-table">${rows}</table>`;
   document.getElementById('sonuc-alan').style.display = 'block';
@@ -1443,10 +1451,17 @@ function dokumTopla() {
   const usdEl = document.getElementById('m-toplam-usd');
   if (usdEl) usdEl.textContent = '$' + Math.round(toplamUsd).toLocaleString('tr-TR');
 
-  // İlk kalem → m-yakit
-  const firstInput = document.querySelector('[id="dr_0"]');
-  if (firstInput) {
-    document.getElementById('m-yakit').textContent = formatEur(parseFloat(firstInput.value)||0);
+  // Uçuş ücreti metriği: toplam uçuş ücreti (tüm bacaklar)
+  if (window._toplamUcusEur !== undefined) {
+    document.getElementById('m-yakit').textContent = formatEur(window._toplamUcusEur);
+    const sureSaat = window._toplamSureSaat || 0;
+    const sh = Math.floor(sureSaat), sm = Math.round((sureSaat-sh)*60);
+    let sm2 = sm; let sh2 = sh;
+    if (sm2 === 60) { sh2++; sm2 = 0; }
+    document.getElementById('m-yakit-unit').textContent = `${sh2}sa ${sm2}dk × €${parseFloat(document.getElementById('saatlik_ucret')?.value||4500).toLocaleString()}/sa`;
+  } else {
+    const firstInput = document.querySelector('[id="dr_0"]');
+    if (firstInput) document.getElementById('m-yakit').textContent = formatEur(parseFloat(firstInput.value)||0);
   }
 
   // sonHesap güncelle
