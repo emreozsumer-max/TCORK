@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>TC-ORK | Hawker 750 Uçuş Hesaplama v1.5</title>
+<title>TC-ORK | Hawker 750 Uçuş Hesaplama v1.6</title>
 
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
@@ -120,7 +120,17 @@ main { max-width: 960px; margin: 0 auto; padding: 1.5rem 2rem 3rem; position: re
 .toast.show { transform: translateY(0); opacity: 1; }
 .toast-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
 
-/* ── MOBİL UYUMLULUK ── */
+/* ── ROTA DETAY MODAL ── */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:2000; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px); padding:1rem; }
+.modal-overlay.hidden { display:none; }
+.modal-box { background:var(--surface); border:1px solid var(--border2); border-radius:14px; width:100%; max-width:680px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 24px 64px rgba(0,0,0,0.6); }
+.modal-header { padding:1.25rem 1.5rem; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-shrink:0; }
+.modal-title { font-size:15px; font-weight:700; color:var(--text); }
+.modal-subtitle { font-size:11px; color:var(--muted); font-family:'IBM Plex Mono',monospace; margin-top:3px; }
+.modal-body { overflow-y:auto; padding:1.25rem 1.5rem; flex:1; }
+.modal-footer { padding:1rem 1.5rem; border-top:1px solid var(--border); display:flex; gap:8px; justify-content:flex-end; flex-shrink:0; }
+.modal-close { background:none; border:none; color:var(--muted); font-size:20px; cursor:pointer; padding:4px 8px; border-radius:6px; }
+.modal-close:hover { background:var(--surface2); color:var(--text); }
 @media (max-width: 768px) {
   header { padding: 0 1rem; height: 54px; }
   .logo { font-size: 14px; gap: 8px; }
@@ -182,7 +192,7 @@ main { max-width: 960px; margin: 0 auto; padding: 1.5rem 2rem 3rem; position: re
   <div class="logo">
     <div class="logo-icon">✈</div>
     TC-ORK <span>Hawker 750</span>
-    <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted); background:var(--surface2); border:1px solid var(--border2); border-radius:4px; padding:2px 7px; margin-left:4px;">v1.5</span>
+    <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted); background:var(--surface2); border:1px solid var(--border2); border-radius:4px; padding:2px 7px; margin-left:4px;">v1.6</span>
   </div>
   <div class="header-info">
     <div class="header-stat">
@@ -686,8 +696,45 @@ main { max-width: 960px; margin: 0 auto; padding: 1.5rem 2rem 3rem; position: re
 
 <div class="toast" id="toast"><div class="toast-dot"></div><span id="toast-msg"></span></div>
 
+<!-- ROTA DETAY MODAL -->
+<div class="modal-overlay hidden" id="rota-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modal-rota-baslik">Rota Detayı</div>
+        <div class="modal-subtitle" id="modal-rota-alt"></div>
+      </div>
+      <button class="modal-close" onclick="rotaModalKapat()">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Özet metrikler -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem;">
+        <div class="metric" style="margin:0;">
+          <div class="metric-label">Toplam Süre</div>
+          <div class="metric-value" id="modal-sure" style="font-size:18px;">—</div>
+        </div>
+        <div class="metric" style="margin:0;">
+          <div class="metric-label">Toplam (EUR)</div>
+          <div class="metric-value" id="modal-eur" style="font-size:18px;">—</div>
+        </div>
+        <div class="metric" style="margin:0;">
+          <div class="metric-label">Toplam (USD)</div>
+          <div class="metric-value" id="modal-usd" style="font-size:18px;">—</div>
+        </div>
+      </div>
+      <!-- Düzenlenebilir maliyet tablosu -->
+      <div id="modal-dokum"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="rotaModalKapat()">Kapat</button>
+      <button class="btn btn-export" onclick="rotaModalYazdir()" style="display:flex;align-items:center;gap:6px;">🖨 Yazdır / PDF</button>
+      <button class="btn btn-primary" onclick="rotaModalKaydet()">💾 Güncelle</button>
+    </div>
+  </div>
+</div>
+
 <footer style="text-align:center; padding:2rem 1rem 1.5rem; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); border-top:1px solid var(--border); margin-top:2rem;">
-  © 2026 <a href="mailto:emreozsumer@gmail.com" style="color:var(--text); font-weight:600; text-decoration:none;">F.Emre Özsümer</a> — Tüm hakları saklıdır. <span style="color:var(--border2);">·</span> <span style="color:var(--accent); font-family:'IBM Plex Mono',monospace;">v1.5</span>
+  © 2026 <a href="mailto:emreozsumer@gmail.com" style="color:var(--text); font-weight:600; text-decoration:none;">F.Emre Özsümer</a> — Tüm hakları saklıdır. <span style="color:var(--border2);">·</span> <span style="color:var(--accent); font-family:'IBM Plex Mono',monospace;">v1.6</span>
 </footer>
 
 <script>
@@ -980,7 +1027,7 @@ function sonucYazdir() {
     </div>
     ${dokumHTML}
     <div class="footer">
-      © ${new Date().getFullYear()} Emre Özsümer — TC-ORK Uçuş Hesaplama v1.5 · ${tarih} ${saat}
+      © ${new Date().getFullYear()} Emre Özsümer — TC-ORK Uçuş Hesaplama v1.6 · ${tarih} ${saat}
     </div>
     <div class="no-print" style="text-align:center;margin-top:1.5rem;">
       <button onclick="window.print()" style="padding:10px 28px;font-size:14px;cursor:pointer;background:#1a2744;color:#fff;border:none;border-radius:6px;">🖨 Yazdır / PDF</button>
@@ -1494,7 +1541,6 @@ function renderRotalar() {
   if (!rotalar.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">✈</div>Henüz rota eklenmedi.</div>'; btn.style.display='none'; return; }
   btn.style.display = 'inline-flex';
 
-  // Filtreleme
   const filtre = document.getElementById('rota-filtre')?.value || 'hepsi';
   let liste = [...rotalar];
   if (filtre === 'ic') liste = liste.filter(r => r.yurtici);
@@ -1502,31 +1548,227 @@ function renderRotalar() {
   else if (filtre === 'ticari') liste = liste.filter(r => r.ucusTipi === 'ticari' || r.tipLabel === 'Ticari');
   else if (filtre === 'sahip') liste = liste.filter(r => r.ucusTipi === 'sahip' || r.tipLabel === 'Sahip' || r.tipLabel === 'Ö.Peker');
 
-  // Sıralama
   const siralama = document.getElementById('rota-siralama')?.value || 'tarih';
   if (siralama === 'maliyet') liste.sort((a,b) => (b.toplamMaliyet||0) - (a.toplamMaliyet||0));
   else if (siralama === 'mesafe') liste.sort((a,b) => (b.mesafe||0) - (a.mesafe||0));
 
   if (!liste.length) { el.innerHTML = '<div class="empty" style="padding:1.5rem;"><div class="empty-icon">🔍</div>Bu filtreye uygun rota yok.</div>'; return; }
 
-  el.innerHTML = liste.map((r,i) => `
-    <div class="rota-item">
+  el.innerHTML = liste.map((r,i) => {
+    // Rota gösterimi: rotaLabel varsa onu kullan, yoksa kalkis→varis
+    const rotaGoster = r.rotaLabel
+      ? r.rotaLabel.replace(/→/g, '<span class="rota-arrow">→</span>')
+      : `${r.kalkis}<span class="rota-arrow">→</span>${r.varis}`;
+    const legBilgi = r.legSayisi > 1 ? ` · ${r.legSayisi} bacak` : '';
+    return `
+    <div class="rota-item" onclick="rotaDetayAc(${r.id})" style="cursor:pointer;" onmouseenter="this.style.background='rgba(77,166,255,0.05)'" onmouseleave="this.style.background=''">
       <div class="rota-num">${String(i+1).padStart(2,'0')}</div>
-      <div class="rota-route">
-        <span class="rota-city">${r.kalkis}</span><span class="rota-arrow">→</span><span class="rota-city">${r.varis}</span>
-        <span style="font-size:10px;color:var(--muted);margin-left:8px">${r.tipLabel||''} · ${r.yurtici?'İç':'Dış'} · ${r.pax||0} PAX</span>
+      <div class="rota-route" style="flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;font-size:15px;font-weight:600;">${rotaGoster}</div>
+        <span style="font-size:10px;color:var(--muted);margin-left:4px;">${r.tipLabel||''} · ${r.yurtici?'İç':'Dış'} · ${r.pax||0} PAX${legBilgi}</span>
       </div>
       <div class="rota-meta">${r.mesafe||'?'} NM · ${r.saat}sa ${r.dak}dk<br>${r.tarih}</div>
       <div class="rota-cost">
         ${formatEur(r.toplamEur||0)}<br>
-        <span style="font-size:11px;color:var(--muted)">${formatTl(r.toplamTl||r.toplamMaliyet||0)}</span>
+        <span style="font-size:11px;color:var(--muted)">$${Math.round(r.toplamUsd||0).toLocaleString('tr-TR')}</span>
       </div>
-      <button class="btn btn-danger" onclick="rotaSil(${r.id})">Sil</button>
-    </div>`).join('');
+      <button class="btn btn-danger" onclick="event.stopPropagation();rotaSil(${r.id})" style="flex-shrink:0;">Sil</button>
+    </div>`;
+  }).join('');
 }
 
 function rotaSil(id) { rotalar = rotalar.filter(r => r.id !== id); kaydet(); renderRotalar(); toast('Rota silindi.'); }
 function tumRotaTemizle() { if (confirm('Tüm rotalar silinsin mi?')) { rotalar = []; kaydet(); renderRotalar(); toast('Tüm rotalar temizlendi.'); } }
+
+// ─── ROTA DETAY MODAL ────────────────────────────────────────────────────────
+let _modalRotaId = null;
+
+function rotaDetayAc(id) {
+  const r = rotalar.find(x => x.id === id);
+  if (!r) return;
+  _modalRotaId = id;
+
+  // Başlık
+  const rotaGoster = r.rotaLabel || (r.kalkis + ' → ' + r.varis);
+  document.getElementById('modal-rota-baslik').textContent = rotaGoster;
+  document.getElementById('modal-rota-alt').textContent =
+    `${r.tarih} · ${r.tipLabel||''} · ${r.yurtici?'Yurt İçi':'Yurt Dışı'} · ${r.pax||0} PAX · ${r.saat}sa ${r.dak}dk`;
+
+  // Metrikler
+  document.getElementById('modal-sure').textContent = `${r.saat}sa ${r.dak}dk`;
+  document.getElementById('modal-eur').textContent = formatEur(r.toplamEur||0);
+  document.getElementById('modal-usd').textContent = '$' + Math.round(r.toplamUsd||0).toLocaleString('tr-TR');
+
+  // Maliyet döküm tablosu (düzenlenebilir)
+  const eurKur = r.eurKur || 43;
+  const usdKur = r.usdKur || 38;
+  const eurUsd = r.eurKur && r.usdKur ? (r.eurKur / r.usdKur) : 1.17;
+
+  // Kaydedilmiş döküm varsa onu kullan, yoksa boş tablo
+  let rows = '';
+  let modalRowId = 0;
+
+  function modalEditRow(label, eur, sub) {
+    const mid = 'md_' + (modalRowId++);
+    return `<tr>
+      <td>
+        <span style="color:var(--muted);font-size:12px;">${label}</span>
+        ${sub ? `<span style="color:var(--muted);font-size:11px;display:block;margin-top:2px;">${sub}</span>` : ''}
+      </td>
+      <td style="text-align:right;">
+        <div style="display:flex;align-items:center;justify-content:flex-end;gap:4px;">
+          <span style="color:var(--muted);font-size:12px;">€</span>
+          <input type="number" id="${mid}" value="${Math.round(eur)}" step="1"
+            style="width:90px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;text-align:right;outline:none;"
+            oninput="modalTopla()" onfocus="this.select()">
+        </div>
+        <span class="md-usd" style="font-size:11px;color:var(--muted);display:block;text-align:right;margin-top:2px;">$${Math.round(eur*eurUsd).toLocaleString()}</span>
+      </td>
+    </tr>`;
+  }
+
+  // Kayıtlı döküm kalemleri varsa
+  if (r.dokumKalemleri && r.dokumKalemleri.length > 0) {
+    r.dokumKalemleri.forEach(k => {
+      rows += modalEditRow(k.label, k.eur, k.sub || '');
+    });
+  } else {
+    // Özet bilgilerden basit tablo oluştur
+    rows += modalEditRow('Uçuş Ücreti', r.ucusEur || 0, `${r.saat}sa ${r.dak}dk × saatlik ücret`);
+    rows += modalEditRow('Diğer masraflar', (r.toplamEur||0) - (r.ucusEur||0), 'Handling, terminal, iniş vb.');
+  }
+
+  // Toplam
+  rows += `<tr class="total-row">
+    <td>TOPLAM</td>
+    <td style="text-align:right;" id="modal-toplam-td">${formatEur(r.toplamEur||0)}<br>
+    <span style="font-size:12px;color:#5cb8ff;" id="modal-toplam-usd">$${Math.round(r.toplamUsd||0).toLocaleString()}</span></td>
+  </tr>`;
+
+  document.getElementById('modal-dokum').innerHTML =
+    `<table class="dokum-table">${rows}</table>`;
+
+  // Toplam hesapla
+  window._modalEurUsd = eurUsd;
+  modalTopla();
+
+  document.getElementById('rota-modal').classList.remove('hidden');
+}
+
+function modalTopla() {
+  const eurUsd = window._modalEurUsd || 1.17;
+  let toplam = 0;
+  document.querySelectorAll('[id^="md_"]').forEach(el => {
+    if (el.type === 'number') {
+      const val = parseFloat(el.value) || 0;
+      toplam += val;
+      const usdSpan = el.closest('td').querySelector('.md-usd');
+      if (usdSpan) usdSpan.textContent = '$' + Math.round(val * eurUsd).toLocaleString();
+    }
+  });
+  const toplamUsd = toplam * eurUsd;
+  const tdEl = document.getElementById('modal-toplam-td');
+  if (tdEl) tdEl.innerHTML = `${formatEur(toplam)}<br><span style="font-size:12px;color:#5cb8ff;" id="modal-toplam-usd">$${Math.round(toplamUsd).toLocaleString()}</span>`;
+  document.getElementById('modal-eur').textContent = formatEur(toplam);
+  document.getElementById('modal-usd').textContent = '$' + Math.round(toplamUsd).toLocaleString('tr-TR');
+}
+
+function rotaModalKapat() {
+  document.getElementById('rota-modal').classList.add('hidden');
+  _modalRotaId = null;
+}
+
+function rotaModalKaydet() {
+  if (!_modalRotaId) return;
+  const idx = rotalar.findIndex(r => r.id === _modalRotaId);
+  if (idx < 0) return;
+  let toplam = 0;
+  const kalemleri = [];
+  document.querySelectorAll('[id^="md_"]').forEach((el, i) => {
+    if (el.type === 'number') {
+      const val = parseFloat(el.value) || 0;
+      toplam += val;
+      // label'ı bul
+      const row = el.closest('tr');
+      const label = row?.querySelector('td:first-child span:first-child')?.textContent || ('Kalem ' + (i+1));
+      const sub = row?.querySelector('td:first-child span:last-child')?.textContent || '';
+      kalemleri.push({ label, eur: val, sub });
+    }
+  });
+  const eurUsd = window._modalEurUsd || 1.17;
+  rotalar[idx] = {
+    ...rotalar[idx],
+    toplamEur: toplam,
+    toplamUsd: Math.round(toplam * eurUsd),
+    toplamMaliyet: toplam * (rotalar[idx].eurKur || 43),
+    toplamTl: toplam * (rotalar[idx].eurKur || 43),
+    dokumKalemleri: kalemleri,
+  };
+  kaydet();
+  renderRotalar();
+  rotaModalKapat();
+  toast('Rota güncellendi ✓');
+}
+
+function rotaModalYazdir() {
+  const r = rotalar.find(x => x.id === _modalRotaId);
+  if (!r) return;
+  const rotaGoster = r.rotaLabel || (r.kalkis + ' → ' + r.varis);
+  const tarih = new Date().toLocaleDateString('tr-TR');
+  const saat = new Date().toLocaleTimeString('tr-TR', {hour:'2-digit',minute:'2-digit'});
+  const dokumHTML = document.getElementById('modal-dokum').innerHTML;
+  const eurEl = document.getElementById('modal-eur').textContent;
+  const usdEl = document.getElementById('modal-usd').textContent;
+
+  const w = window.open('', '_blank', 'width=800,height=900');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <title>TC-ORK — ${rotaGoster}</title>
+    <style>
+      * { margin:0; padding:0; box-sizing:border-box; }
+      body { font-family:'Segoe UI',Arial,sans-serif; padding:2.5rem; color:#1a1a1a; font-size:13px; }
+      .header { display:flex; justify-content:space-between; margin-bottom:1.5rem; border-bottom:2px solid #1a2744; padding-bottom:1rem; }
+      .header h1 { font-size:18px; color:#1a2744; }
+      .header h2 { font-size:13px; color:#555; font-weight:400; margin-top:4px; }
+      .meta { text-align:right; font-size:11px; color:#777; line-height:1.8; }
+      .metrics { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:1.5rem; }
+      .m-box { border:1px solid #ddd; border-radius:6px; padding:10px; text-align:center; }
+      .m-box .label { font-size:9px; text-transform:uppercase; letter-spacing:.08em; color:#888; }
+      .m-box .val { font-size:20px; font-weight:700; color:#1a2744; margin-top:4px; }
+      table { width:100%; border-collapse:collapse; font-size:12px; }
+      td { padding:8px 6px; border-bottom:1px solid #eee; }
+      td:last-child { text-align:right; font-weight:600; }
+      .total-row td { border-top:2px solid #1a2744; font-size:15px; font-weight:700; color:#1a2744; }
+      input { border:1px solid #ddd; border-radius:4px; padding:3px 6px; font-size:12px; width:80px; text-align:right; }
+      .footer { margin-top:2rem; padding-top:1rem; border-top:1px solid #ddd; font-size:10px; color:#999; text-align:center; }
+      @media print { .no-print { display:none; } }
+    </style>
+  </head><body>
+    <div class="header">
+      <div>
+        <h1>✈ TC-ORK — Hawker 750</h1>
+        <h2>${rotaGoster} · ${r.tipLabel||''} · ${r.yurtici?'Yurt İçi':'Yurt Dışı'}</h2>
+      </div>
+      <div class="meta">${r.tarih}<br>${r.saat}sa ${r.dak}dk${r.legSayisi>1?' · '+r.legSayisi+' bacak':''}<br>${r.pax||0} PAX</div>
+    </div>
+    <div class="metrics">
+      <div class="m-box"><div class="label">Toplam Süre</div><div class="val">${r.saat}sa ${r.dak}dk</div></div>
+      <div class="m-box"><div class="label">Toplam (EUR)</div><div class="val">${eurEl}</div></div>
+      <div class="m-box"><div class="label">Toplam (USD)</div><div class="val">${usdEl}</div></div>
+    </div>
+    ${dokumHTML}
+    <div class="footer">© ${new Date().getFullYear()} F.Emre Özsümer — TC-ORK Uçuş Hesaplama v1.6 · ${tarih} ${saat}</div>
+    <div class="no-print" style="text-align:center;margin-top:1.5rem;">
+      <button onclick="window.print()" style="padding:10px 28px;font-size:14px;cursor:pointer;background:#1a2744;color:#fff;border:none;border-radius:6px;">🖨 Yazdır / PDF</button>
+    </div>
+  </body></html>`);
+  w.document.close();
+  setTimeout(() => w.print(), 400);
+}
+
+// Overlay tıklanınca kapat
+document.getElementById('rota-modal').addEventListener('click', function(e) {
+  if (e.target === this) rotaModalKapat();
+});
 
 function renderRapor() {
   const tablo = document.getElementById('rapor-tablo');
