@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>TC-ORK | Hawker 750 Uçuş Hesaplama v1.4</title>
+<title>TC-ORK | Hawker 750 Uçuş Hesaplama v1.5</title>
 
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
@@ -182,7 +182,7 @@ main { max-width: 960px; margin: 0 auto; padding: 1.5rem 2rem 3rem; position: re
   <div class="logo">
     <div class="logo-icon">✈</div>
     TC-ORK <span>Hawker 750</span>
-    <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted); background:var(--surface2); border:1px solid var(--border2); border-radius:4px; padding:2px 7px; margin-left:4px;">v1.4</span>
+    <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted); background:var(--surface2); border:1px solid var(--border2); border-radius:4px; padding:2px 7px; margin-left:4px;">v1.5</span>
   </div>
   <div class="header-info">
     <div class="header-stat">
@@ -687,7 +687,7 @@ main { max-width: 960px; margin: 0 auto; padding: 1.5rem 2rem 3rem; position: re
 <div class="toast" id="toast"><div class="toast-dot"></div><span id="toast-msg"></span></div>
 
 <footer style="text-align:center; padding:2rem 1rem 1.5rem; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); border-top:1px solid var(--border); margin-top:2rem;">
-  © 2026 <a href="mailto:emreozsumer@gmail.com" style="color:var(--text); font-weight:600; text-decoration:none;">F.Emre Özsümer</a> — Tüm hakları saklıdır. <span style="color:var(--border2);">·</span> <span style="color:var(--accent); font-family:'IBM Plex Mono',monospace;">v1.4</span>
+  © 2026 <a href="mailto:emreozsumer@gmail.com" style="color:var(--text); font-weight:600; text-decoration:none;">F.Emre Özsümer</a> — Tüm hakları saklıdır. <span style="color:var(--border2);">·</span> <span style="color:var(--accent); font-family:'IBM Plex Mono',monospace;">v1.5</span>
 </footer>
 
 <script>
@@ -980,7 +980,7 @@ function sonucYazdir() {
     </div>
     ${dokumHTML}
     <div class="footer">
-      © ${new Date().getFullYear()} Emre Özsümer — TC-ORK Uçuş Hesaplama v1.4 · ${tarih} ${saat}
+      © ${new Date().getFullYear()} Emre Özsümer — TC-ORK Uçuş Hesaplama v1.5 · ${tarih} ${saat}
     </div>
     <div class="no-print" style="text-align:center;margin-top:1.5rem;">
       <button onclick="window.print()" style="padding:10px 28px;font-size:14px;cursor:pointer;background:#1a2744;color:#fff;border:none;border-radius:6px;">🖨 Yazdır / PDF</button>
@@ -1302,8 +1302,8 @@ function hesapla() {
       rows += `<tr><td colspan="2" style="padding:6px 0 2px;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);">
         ── BACAK ${i+1}: ${leg.kIcao} → ${leg.vIcao} &nbsp;·&nbsp; ${legSaatTam}sa ${legDakTam}dk${leg.mesafe?' · '+leg.mesafe+' NM':''}${leg.sureDk>270?' ⛽':''}
       </td></tr>`;
-      rows += editRow(`✈ Uçuş Ücreti`, ucusEur, `${legSureSaat.toFixed(2)} sa × €${saatlikUcret.toLocaleString('tr-TR')}/sa`, true);
-      rows += editRow(`Eurocontrol`, euroEur, `€200/sa × ${legSureSaat.toFixed(2)} sa`);
+      rows += editRow(`✈ Uçuş Ücreti`, ucusEur, `${legSaatTam}sa ${legDakTam}dk × €${saatlikUcret.toLocaleString('tr-TR')}/sa`, true);
+      rows += editRow(`Eurocontrol`, euroEur, `€200/sa × ${legSaatTam}sa ${legDakTam}dk`);
       rows += editRow(`Dispatch / Planlama`, 500, `Sabit €500 / bacak`);
       rows += editRow(`Handling — ${leg.kIcao}`, hKalkis, handlingLabel(leg.kIcao));
       rows += editRow(`Handling — ${leg.vIcao}${isParkLeg?' (+ park)':''}`, hVaris, handlingLabel(leg.vIcao));
@@ -1365,8 +1365,8 @@ function hesapla() {
         ── BACAK ${i+1}: ${leg.kIcao} → ${leg.vIcao} &nbsp;·&nbsp; ${legSaatTam}sa ${legDakTam}dk${leg.sureDk>270?' ⛽':''}
       </td></tr>`;
       rows += editRow(`⛽ Yakıt`, Math.round(yakitEur), `${Math.round(yakitL).toLocaleString()} L × ${yakitTlL} TL/L`, true);
-      rows += editRow(`Mürettebat`, Math.round(crewEur), `${legSureSaat.toFixed(2)} sa × €${crewSaat}/sa`);
-      rows += editRow(`Eurocontrol`, euroEur, `€${sahipEuroSa}/sa × ${legSureSaat.toFixed(2)} sa`);
+      rows += editRow(`Mürettebat`, Math.round(crewEur), `${legSaatTam}sa ${legDakTam}dk × €${crewSaat}/sa`);
+      rows += editRow(`Eurocontrol`, euroEur, `€${sahipEuroSa}/sa × ${legSaatTam}sa ${legDakTam}dk`);
       rows += editRow(`Bakım rezervi`, Math.round(bakimEur), `€${bakimSaat}/sa`);
       rows += editRow(`Sigorta`, Math.round(sigortaEur), `€${sigortaSaat}/sa`);
       rows += editRow(`Dispatch`, sahipDispatch, 'Sabit €500 / bacak');
@@ -1612,7 +1612,7 @@ const ROTA_DB = {
   "LTFJ_LTBJ":48,
   "LTBJ_LTFJ":50,
   "LTAC_HECA":106,
-  "HECA_LTAC":101,
+  "HECA_LTAC":105,  // ★ 2026 güncellendi: 1sa45dk
   "LTAC_EGKB":240,  // Düzeltildi: 240dk (Ankara-Biggin Hill)
   "LTBJ_EGKB":240,
   "EGKB_LTFJ":207,  // Excel: 207dk
@@ -1668,6 +1668,18 @@ const ROTA_DB = {
   "OMDW_LTBA":120,  // ★ 2026: 2sa00dk, 738NM
   // ── Pau / Fransa (★ 2026) ────────────────────────────────────────────────
   "LTFM_LFBP":220,"LFBP_LTFM":210,
+  "LTBA_LFBP":205,"LFBP_LTBA":215,  // ★ 2026: 3sa25dk/3sa35dk, 1403/1379NM
+  // ── Sudan / Irak / Fas rotaları (★ 2026) ─────────────────────────────────
+  "LTFJ_HSSK":215,"HSSK_HECA":165,  // Hartum yeni havalimanı
+  "LTFJ_ORBI":150,"ORBI_LTFD":195,"LTFD_LTAC":50,  // Bağdat rotası
+  // ── Marakeş rotaları (★ 2026) ────────────────────────────────────────────
+  "LTBA_LIEO":150,  // İstanbul-Sardinya
+  "LIEO_GMMX":170,"GMMX_LIEO":180,  // Sardinya-Marakeş
+  "LIEO_LTAI":180,  // Sardinya-Antalya
+  "LTAI_LCEN":45,   // Antalya-Ercan
+  "LCEN_LTBA":80,   // Ercan-İstanbul
+  // ── Gaziantep-Ercan (★ 2026) ─────────────────────────────────────────────
+  "LTAJ_LCEN":55,
   // ── Bükreş / Bakü devam (★ 2026) ────────────────────────────────────────
   "LRBS_UBBB":194,
   // ── Al-Oweinat / Libya (★ 2026) ──────────────────────────────────────────
@@ -1780,6 +1792,10 @@ const HANDLING_DEFAULTS = [
   {icao:"LRBS", name:"Bükreş Băneasa",     para:"EUR", fiyat:1500},
   {icao:"EDDL", name:"Düsseldorf",         para:"EUR", fiyat:2000, not:"★ Gece park: €6.800/gün"},
   {icao:"LEBL", name:"Barcelona",          para:"EUR", fiyat:1948, not:"★ AviaVIP fatura #52604Q0002 (FBO+güvenlik+iniş)"},
+  {icao:"LFBP", name:"Pau Pyrénées",       para:"EUR", fiyat:2000, not:"★ 2026 gerçek veri"},
+  {icao:"GMMX", name:"Marakeş Menara",     para:"EUR", fiyat:2000, not:"★ 2026 yaklaşık fiyat"},
+  {icao:"HSSK", name:"Hartum Yeni",        para:"USD", fiyat:3000, not:"Sudan - tahmini"},
+  {icao:"ORBI", name:"Bağdat Uluslararası",para:"USD", fiyat:4000, not:"Irak - tahmini"},
   {icao:"UAAA", name:"Almatı",             para:"USD", fiyat:2000, not:"★ Yaklaşık fiyat"},
   {icao:"BKPR", name:"Priştine",           para:"EUR", fiyat:1400},
   {icao:"DAAG", name:"Cezayir",            para:"EUR", fiyat:2500},
@@ -2030,6 +2046,9 @@ const ICAO_MAP = {
   "BERNICE":"HEBR",
   "BENİNA":"HLLB","BENINA":"HLLB","BİNGAZİ":"HLLB","BINGAZI":"HLLB",
   "CEZAYİR":"DAAG","CEZAYIR":"DAAG","ALGIERS":"DAAG",
+  "HARTUM":"HSSK","KHARTOUM":"HSSK","HARTUM YENİ":"HSSK",
+  "BAĞDAT":"ORBI","BAGHDAD":"ORBI","BAGDAT":"ORBI",
+  "MARAKEŞ":"GMMX","MARRAKESH":"GMMX","MARRAKEŞ":"GMMX","MARRAKECH":"GMMX",
   // ── KAFKASYA / ORTA ASYA ───────────────────────────────────────────────────
   "BAKÜ":"UBBB","BAKU":"UBBB",
   "BATUMİ":"UGSB","BATUMI":"UGSB",
@@ -2091,8 +2110,11 @@ const AIRPORT_COORDS = {
   "HLLB":[32.0968,20.2694],"HECA":[30.1219,31.4056],"HEGN":[27.1784,33.7994],
   "HELX":[25.6740,32.7066],"HEBR":[23.9804,35.4603],"HESH":[27.9773,34.3950],
   "HEOW":[22.5833,28.7167],  // Al-Oweinat International
+  "HSSK":[15.5889,32.5531],  // Hartum Yeni Havalimanı (Sudan)
+  "GMMX":[31.6069,-8.0363],  // Marakeş Menara (Fas)
   "OOMS":[23.5933,58.2844],"OMDW":[24.8967,55.1614],"OMDB":[25.2528,55.3644],
   "OPMT":[33.5489,72.4050],  // İslamabad Yeni Havalimanı
+  "ORBI":[33.2625,44.2346],  // Bağdat Uluslararası (Irak)
   "OERK":[24.9576,46.6988],"OEJN":[21.6796,39.1565],"OEMA":[24.5534,39.7051],
   "OEAO":[26.4817,37.5267],"OERS":[24.7266,46.6519],
   "ORER":[36.2376,43.9632],"ORMM":[30.5491,47.6624],
@@ -2192,6 +2214,9 @@ function buildAirportList() {
     "OERK":"Riyad","OEJN":"Cidde","OEMA":"Medine","OEAO":"Al-Ula",
     "OERS":"Riyad (King Salman)","ORER":"Erbil","ORMM":"Basra",
     "OTBD":"Doha","OJAM":"Amman","DAAG":"Cezayir",
+    "HSSK":"Hartum Yeni (Sudan)",
+    "ORBI":"Bağdat Uluslararası",
+    "GMMX":"Marakeş Menara",
     "OPMT":"İslamabad (Yeni)",
     "UAAA":"Almatı (Kazakistan)",
     "HEOW":"Al-Oweinat",
